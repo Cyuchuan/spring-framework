@@ -1,1 +1,3 @@
 开始第一次阅读spring源码
+1.初次学习gradle
+    在gradle中，settings.gradle这个文件类似于maven中的dependenciesManagaer，就是进行项目的申明，管理
