@@ -1,3 +1,6 @@
 开始第一次阅读spring源码
 1.初次学习gradle
     在gradle中，settings.gradle这个文件类似于maven中的dependenciesManagaer，就是进行项目的申明，管理
+
+2.学习spring源码
+    a.Resource、ResourceLoader、BeanDefinition是spring资源读取的重要接口（可以通过XmlBeanDefinitionReaderTests类进行调试）
