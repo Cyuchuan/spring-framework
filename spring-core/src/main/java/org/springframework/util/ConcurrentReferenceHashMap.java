@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -232,24 +232,27 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	@Override
 	@Nullable
 	public V get(@Nullable Object key) {
-		Reference<K, V> ref = getReference(key, Restructure.WHEN_NECESSARY);
-		Entry<K, V> entry = (ref != null ? ref.get() : null);
+		Entry<K, V> entry = getEntryIfAvailable(key);
 		return (entry != null ? entry.getValue() : null);
 	}
 
 	@Override
 	@Nullable
 	public V getOrDefault(@Nullable Object key, @Nullable V defaultValue) {
-		Reference<K, V> ref = getReference(key, Restructure.WHEN_NECESSARY);
-		Entry<K, V> entry = (ref != null ? ref.get() : null);
+		Entry<K, V> entry = getEntryIfAvailable(key);
 		return (entry != null ? entry.getValue() : defaultValue);
 	}
 
 	@Override
 	public boolean containsKey(@Nullable Object key) {
-		Reference<K, V> ref = getReference(key, Restructure.WHEN_NECESSARY);
-		Entry<K, V> entry = (ref != null ? ref.get() : null);
+		Entry<K, V> entry = getEntryIfAvailable(key);
 		return (entry != null && ObjectUtils.nullSafeEquals(entry.getKey(), key));
+	}
+
+	@Nullable
+	private Entry<K, V> getEntryIfAvailable(@Nullable Object key) {
+		Reference<K, V> ref = getReference(key, Restructure.WHEN_NECESSARY);
+		return (ref != null ? ref.get() : null);
 	}
 
 	/**
@@ -282,7 +285,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
 			@Override
 			@Nullable
-			protected V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
+			protected V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries entries) {
 				if (entry != null) {
 					V oldValue = entry.getValue();
 					if (overwriteExisting) {
@@ -527,12 +530,15 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 				final Reference<K, V> head = this.references[index];
 				Reference<K, V> ref = findInChain(head, key, hash);
 				Entry<K, V> entry = (ref != null ? ref.get() : null);
-				Entries<V> entries = value -> {
-					@SuppressWarnings("unchecked")
-					Entry<K, V> newEntry = new Entry<>((K) key, value);
-					Reference<K, V> newReference = Segment.this.referenceManager.createReference(newEntry, hash, head);
-					Segment.this.references[index] = newReference;
-					Segment.this.count.incrementAndGet();
+				Entries entries = new Entries() {
+					@Override
+					public void add(@Nullable V value) {
+						@SuppressWarnings("unchecked")
+						Entry<K, V> newEntry = new Entry<>((K) key, value);
+						Reference<K, V> newReference = Segment.this.referenceManager.createReference(newEntry, hash, head);
+						Segment.this.references[index] = newReference;
+						Segment.this.count.incrementAndGet();
+					}
 				};
 				return task.execute(ref, entry, entries);
 			}
@@ -570,70 +576,65 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 */
 		protected final void restructureIfNecessary(boolean allowResize) {
 			int currCount = this.count.get();
-			boolean needsResize = allowResize && (currCount > 0 && currCount >= this.resizeThreshold);
+			boolean needsResize = (currCount > 0 && currCount >= this.resizeThreshold);
 			Reference<K, V> ref = this.referenceManager.pollForPurge();
-			if (ref != null || (needsResize)) {
-				restructure(allowResize, ref);
-			}
-		}
-
-		private void restructure(boolean allowResize, @Nullable Reference<K, V> ref) {
-			boolean needsResize;
-			lock();
-			try {
-				int countAfterRestructure = this.count.get();
-				Set<Reference<K, V>> toPurge = Collections.emptySet();
-				if (ref != null) {
-					toPurge = new HashSet<>();
-					while (ref != null) {
-						toPurge.add(ref);
-						ref = this.referenceManager.pollForPurge();
-					}
-				}
-				countAfterRestructure -= toPurge.size();
-
-				// Recalculate taking into account count inside lock and items that
-				// will be purged
-				needsResize = (countAfterRestructure > 0 && countAfterRestructure >= this.resizeThreshold);
-				boolean resizing = false;
-				int restructureSize = this.references.length;
-				if (allowResize && needsResize && restructureSize < MAXIMUM_SEGMENT_SIZE) {
-					restructureSize <<= 1;
-					resizing = true;
-				}
-
-				// Either create a new table or reuse the existing one
-				Reference<K, V>[] restructured =
-						(resizing ? createReferenceArray(restructureSize) : this.references);
-
-				// Restructure
-				for (int i = 0; i < this.references.length; i++) {
-					ref = this.references[i];
-					if (!resizing) {
-						restructured[i] = null;
-					}
-					while (ref != null) {
-						if (!toPurge.contains(ref)) {
-							Entry<K, V> entry = ref.get();
-							if (entry != null) {
-								int index = getIndex(ref.getHash(), restructured);
-								restructured[index] = this.referenceManager.createReference(
-										entry, ref.getHash(), restructured[index]);
-							}
+			if (ref != null || (needsResize && allowResize)) {
+				lock();
+				try {
+					int countAfterRestructure = this.count.get();
+					Set<Reference<K, V>> toPurge = Collections.emptySet();
+					if (ref != null) {
+						toPurge = new HashSet<>();
+						while (ref != null) {
+							toPurge.add(ref);
+							ref = this.referenceManager.pollForPurge();
 						}
-						ref = ref.getNext();
 					}
-				}
+					countAfterRestructure -= toPurge.size();
 
-				// Replace volatile members
-				if (resizing) {
-					this.references = restructured;
-					this.resizeThreshold = (int) (this.references.length * getLoadFactor());
+					// Recalculate taking into account count inside lock and items that
+					// will be purged
+					needsResize = (countAfterRestructure > 0 && countAfterRestructure >= this.resizeThreshold);
+					boolean resizing = false;
+					int restructureSize = this.references.length;
+					if (allowResize && needsResize && restructureSize < MAXIMUM_SEGMENT_SIZE) {
+						restructureSize <<= 1;
+						resizing = true;
+					}
+
+					// Either create a new table or reuse the existing one
+					Reference<K, V>[] restructured =
+							(resizing ? createReferenceArray(restructureSize) : this.references);
+
+					// Restructure
+					for (int i = 0; i < this.references.length; i++) {
+						ref = this.references[i];
+						if (!resizing) {
+							restructured[i] = null;
+						}
+						while (ref != null) {
+							if (!toPurge.contains(ref)) {
+								Entry<K, V> entry = ref.get();
+								if (entry != null) {
+									int index = getIndex(ref.getHash(), restructured);
+									restructured[index] = this.referenceManager.createReference(
+											entry, ref.getHash(), restructured[index]);
+								}
+							}
+							ref = ref.getNext();
+						}
+					}
+
+					// Replace volatile members
+					if (resizing) {
+						this.references = restructured;
+						this.resizeThreshold = (int) (this.references.length * getLoadFactor());
+					}
+					this.count.set(Math.max(countAfterRestructure, 0));
 				}
-				this.count.set(Math.max(countAfterRestructure, 0));
-			}
-			finally {
-				unlock();
+				finally {
+					unlock();
+				}
 			}
 		}
 
@@ -801,7 +802,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * @see #execute(Reference, Entry)
 		 */
 		@Nullable
-		protected T execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
+		protected T execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries entries) {
 			return execute(ref, entry);
 		}
 
@@ -829,15 +830,15 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 
 	/**
-	 * Allows a task access to {@link ConcurrentReferenceHashMap.Segment} entries.
+	 * Allows a task access to {@link Segment} entries.
 	 */
-	private interface Entries<V> {
+	private abstract class Entries {
 
 		/**
 		 * Add a new entry with the specified value.
 		 * @param value the value to add
 		 */
-		void add(@Nullable V value);
+		public abstract void add(@Nullable V value);
 	}
 
 

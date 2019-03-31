@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -105,7 +105,6 @@ public class ControllerMethodResolverTests {
 		assertEquals(SessionAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 
-		assertEquals(ContinuationHandlerMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(HttpEntityArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ModelArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ErrorsMethodArgumentResolver.class, next(resolvers, index).getClass());
@@ -144,7 +143,6 @@ public class ControllerMethodResolverTests {
 		assertEquals(SessionAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 
-		assertEquals(ContinuationHandlerMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ModelArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ErrorsMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ServerWebExchangeArgumentResolver.class, next(resolvers, index).getClass());
@@ -211,7 +209,6 @@ public class ControllerMethodResolverTests {
 		assertEquals(SessionAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 
-		assertEquals(ContinuationHandlerMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ModelArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ServerWebExchangeArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(PrincipalArgumentResolver.class, next(resolvers, index).getClass());

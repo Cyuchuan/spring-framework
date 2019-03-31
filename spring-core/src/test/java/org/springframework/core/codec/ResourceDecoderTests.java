@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@ package org.springframework.core.codec;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Test;
@@ -101,28 +100,23 @@ public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecode
 	}
 
 	@Override
-	public void decodeToMono() {
+	public void decodeToMono() throws Exception {
 		Flux<DataBuffer> input = Flux.concat(
 				dataBuffer(this.fooBytes),
 				dataBuffer(this.barBytes));
 
-		testDecodeToMonoAll(input, ResolvableType.forClass(Resource.class),
-				step -> step
-						.consumeNextWith(value -> {
-							Resource resource = (Resource) value;
-							try {
-								byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
-								assertEquals("foobar", new String(bytes));
-								assertEquals("testFile", resource.getFilename());
-							}
-							catch (IOException e) {
-								fail(e.getMessage());
-							}
-						})
-						.expectComplete()
-						.verify(),
-				null,
-				Collections.singletonMap(ResourceDecoder.FILENAME_HINT, "testFile"));
+		testDecodeToMonoAll(input, Resource.class, step -> step
+				.consumeNextWith(resource -> {
+					try {
+						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
+						assertEquals("foobar", new String(bytes));
+					}
+					catch (IOException e) {
+						fail(e.getMessage());
+					}
+				})
+				.expectComplete()
+				.verify());
 	}
 
 }

@@ -363,27 +363,6 @@ public final class Type {
    * @return the {@link Type} corresponding to the return type of the given method descriptor.
    */
   public static Type getReturnType(final String methodDescriptor) {
-    return getTypeInternal(
-        methodDescriptor, getReturnTypeOffset(methodDescriptor), methodDescriptor.length());
-  }
-
-  /**
-   * Returns the {@link Type} corresponding to the return type of the given method.
-   *
-   * @param method a method.
-   * @return the {@link Type} corresponding to the return type of the given method.
-   */
-  public static Type getReturnType(final Method method) {
-    return getType(method.getReturnType());
-  }
-
-  /**
-   * Returns the start index of the return type of the given method descriptor.
-   *
-   * @param methodDescriptor a method descriptor.
-   * @return the start index of the return type of the given method descriptor.
-   */
-  static int getReturnTypeOffset(final String methodDescriptor) {
     // Skip the first character, which is always a '('.
     int currentOffset = 1;
     // Skip the argument types, one at a each loop iteration.
@@ -396,7 +375,17 @@ public final class Type {
         currentOffset = methodDescriptor.indexOf(';', currentOffset) + 1;
       }
     }
-    return currentOffset + 1;
+    return getTypeInternal(methodDescriptor, currentOffset + 1, methodDescriptor.length());
+  }
+
+  /**
+   * Returns the {@link Type} corresponding to the return type of the given method.
+   *
+   * @param method a method.
+   * @return the {@link Type} corresponding to the return type of the given method.
+   */
+  public static Type getReturnType(final Method method) {
+    return getType(method.getReturnType());
   }
 
   /**
@@ -516,7 +505,11 @@ public final class Type {
     if (sort == OBJECT) {
       return valueBuffer.substring(valueBegin - 1, valueEnd + 1);
     } else if (sort == INTERNAL) {
-      return 'L' + valueBuffer.substring(valueBegin, valueEnd) + ';';
+      return new StringBuilder()
+          .append('L')
+          .append(valueBuffer, valueBegin, valueEnd)
+          .append(';')
+          .toString();
     } else {
       return valueBuffer.substring(valueBegin, valueEnd);
     }
@@ -638,7 +631,14 @@ public final class Type {
       }
       stringBuilder.append(descriptor);
     } else {
-      stringBuilder.append('L').append(getInternalName(currentClass)).append(';');
+      stringBuilder.append('L');
+      String name = currentClass.getName();
+      int nameLength = name.length();
+      for (int i = 0; i < nameLength; ++i) {
+        char car = name.charAt(i);
+        stringBuilder.append(car == '.' ? '/' : car);
+      }
+      stringBuilder.append(';');
     }
   }
 

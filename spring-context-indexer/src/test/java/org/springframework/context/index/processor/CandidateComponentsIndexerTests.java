@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,6 @@ import javax.persistence.Converter;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
-import javax.transaction.Transactional;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,7 +44,6 @@ import org.springframework.context.index.sample.SampleRepository;
 import org.springframework.context.index.sample.SampleService;
 import org.springframework.context.index.sample.cdi.SampleManagedBean;
 import org.springframework.context.index.sample.cdi.SampleNamed;
-import org.springframework.context.index.sample.cdi.SampleTransactional;
 import org.springframework.context.index.sample.jpa.SampleConverter;
 import org.springframework.context.index.sample.jpa.SampleEmbeddable;
 import org.springframework.context.index.sample.SampleEmbedded;
@@ -69,7 +67,6 @@ import static org.springframework.context.index.processor.Metadata.*;
  * Tests for {@link CandidateComponentsIndexer}.
  *
  * @author Stephane Nicoll
- * @author Vedran Pavic
  */
 public class CandidateComponentsIndexerTests {
 
@@ -143,11 +140,6 @@ public class CandidateComponentsIndexerTests {
 	@Test
 	public void cdiNamed() {
 		testSingleComponent(SampleNamed.class, Named.class);
-	}
-
-	@Test
-	public void cdiTransactional() {
-		testSingleComponent(SampleTransactional.class, Transactional.class);
 	}
 
 	@Test

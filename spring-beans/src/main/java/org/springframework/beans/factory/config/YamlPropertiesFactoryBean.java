@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,19 +42,19 @@ import org.springframework.lang.Nullable;
  * <pre class="code">
  * environments:
  *   dev:
- *     url: https://dev.bar.com
+ *     url: http://dev.bar.com
  *     name: Developer Setup
  *   prod:
- *     url: https://foo.bar.com
+ *     url: http://foo.bar.com
  *     name: My Cool App
  * </pre>
  *
  * is transformed into these properties:
  *
  * <pre class="code">
- * environments.dev.url=https://dev.bar.com
+ * environments.dev.url=http://dev.bar.com
  * environments.dev.name=Developer Setup
- * environments.prod.url=https://foo.bar.com
+ * environments.prod.url=http://foo.bar.com
  * environments.prod.name=My Cool App
  * </pre>
  *

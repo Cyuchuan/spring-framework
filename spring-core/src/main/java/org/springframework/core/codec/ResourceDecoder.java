@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,10 +41,6 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 
-	/** Name of hint with a filename for the resource(e.g. from "Content-Disposition" HTTP header). */
-	public static String FILENAME_HINT = ResourceDecoder.class.getName() + ".filename";
-
-
 	public ResourceDecoder() {
 		super(MimeTypeUtils.ALL);
 	}
@@ -76,22 +72,11 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 		}
 
 		Class<?> clazz = elementType.toClass();
-		String filename = hints != null ? (String) hints.get(FILENAME_HINT) : null;
 		if (clazz == InputStreamResource.class) {
-			return new InputStreamResource(new ByteArrayInputStream(bytes)) {
-				@Override
-				public String getFilename() {
-					return filename;
-				}
-			};
+			return new InputStreamResource(new ByteArrayInputStream(bytes));
 		}
 		else if (Resource.class.isAssignableFrom(clazz)) {
-			return new ByteArrayResource(bytes) {
-				@Override
-				public String getFilename() {
-					return filename;
-				}
-			};
+			return new ByteArrayResource(bytes);
 		}
 		else {
 			throw new IllegalStateException("Unsupported resource class: " + clazz);

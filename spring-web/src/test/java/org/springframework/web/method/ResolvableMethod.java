@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,9 +57,7 @@ import org.springframework.util.ReflectionUtils;
 import static java.util.stream.Collectors.*;
 
 /**
- * Convenience class to resolve to a Method and method parameters.
- *
- * <p>Note that a replica of this class also exists in spring-messaging.
+ * Convenience class to resolve method parameters from hints.
  *
  * <h1>Background</h1>
  *

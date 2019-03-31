@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,6 @@ import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
@@ -125,8 +124,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 					}))
 					.flatMap(buffer -> {
 						headers.setContentLength(buffer.readableByteCount());
-						return message.writeWith(Mono.fromCallable(() -> buffer)
-								.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release));
+						return message.writeWith(Mono.just(buffer));
 					});
 		}
 

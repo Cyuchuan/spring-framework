@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.web.filter.reactive.ForwardedHeaderFilter;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
@@ -179,13 +180,12 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Configuration
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "deprecation"})
 	static class ForwardedHeaderFilterConfig {
 
 		@Bean
-		@SuppressWarnings("deprecation")
-		public WebFilter forwardedHeaderFilter() {
-			return new org.springframework.web.filter.reactive.ForwardedHeaderFilter();
+		public ForwardedHeaderFilter forwardedHeaderFilter() {
+			return new ForwardedHeaderFilter();
 		}
 
 		@Bean

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,24 +16,19 @@
 
 package org.springframework.orm.jpa.hibernate;
 
-import javax.persistence.AttributeConverter;
-
 import org.hibernate.SessionFactory;
 import org.hibernate.resource.beans.container.spi.BeanContainer;
 import org.hibernate.resource.beans.container.spi.ContainedBean;
 import org.hibernate.resource.beans.spi.BeanInstanceProducer;
 import org.hibernate.resource.beans.spi.ManagedBeanRegistry;
 import org.hibernate.service.ServiceRegistry;
+
 import org.junit.Test;
 
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.jpa.AbstractEntityManagerFactoryIntegrationTests;
-import org.springframework.orm.jpa.hibernate.beans.BeanSource;
-import org.springframework.orm.jpa.hibernate.beans.MultiplePrototypesInSpringContextTestBean;
-import org.springframework.orm.jpa.hibernate.beans.NoDefinitionInSpringContextTestBean;
-import org.springframework.orm.jpa.hibernate.beans.SinglePrototypeInSpringContextTestBean;
+import org.springframework.orm.jpa.hibernate.beans.*;
 
 import static org.junit.Assert.*;
 
@@ -41,7 +36,6 @@ import static org.junit.Assert.*;
  * Hibernate-specific SpringBeanContainer integration tests.
  *
  * @author Yoann Rodiere
- * @author Juergen Hoeller
  */
 public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 		extends AbstractEntityManagerFactoryIntegrationTests {
@@ -57,9 +51,9 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 	}
 
 	private ManagedBeanRegistry getManagedBeanRegistry() {
-		SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
+		SessionFactory sessionFactory = entityManagerFactory.unwrap( SessionFactory.class );
 		ServiceRegistry serviceRegistry = sessionFactory.getSessionFactoryOptions().getServiceRegistry();
-		return serviceRegistry.requireService(ManagedBeanRegistry.class);
+		return serviceRegistry.requireService( ManagedBeanRegistry.class );
 	}
 
 	private BeanContainer getBeanContainer() {
@@ -74,7 +68,8 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 
 		ContainedBean<SinglePrototypeInSpringContextTestBean> bean = beanContainer.getBean(
 				SinglePrototypeInSpringContextTestBean.class,
-				JpaLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+				JpaLifecycleOptions.INSTANCE,
+				IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
 		assertNotNull(bean);
@@ -90,7 +85,8 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 
 		ContainedBean<MultiplePrototypesInSpringContextTestBean> bean = beanContainer.getBean(
 				"multiple-1", MultiplePrototypesInSpringContextTestBean.class,
-				JpaLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+				JpaLifecycleOptions.INSTANCE,
+				IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
 		assertNotNull(bean);
@@ -107,7 +103,8 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 
 		ContainedBean<SinglePrototypeInSpringContextTestBean> bean = beanContainer.getBean(
 				SinglePrototypeInSpringContextTestBean.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+				NativeLifecycleOptions.INSTANCE,
+				IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
 		assertNotNull(bean);
@@ -118,7 +115,8 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 
 		ContainedBean<SinglePrototypeInSpringContextTestBean> bean2 = beanContainer.getBean(
 				SinglePrototypeInSpringContextTestBean.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+				NativeLifecycleOptions.INSTANCE,
+				IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
 		assertNotNull(bean2);
@@ -135,7 +133,8 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 
 		ContainedBean<MultiplePrototypesInSpringContextTestBean> bean = beanContainer.getBean(
 				"multiple-1", MultiplePrototypesInSpringContextTestBean.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+				NativeLifecycleOptions.INSTANCE,
+				IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
 		assertNotNull(bean);
@@ -146,7 +145,8 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 
 		ContainedBean<MultiplePrototypesInSpringContextTestBean> bean2 = beanContainer.getBean(
 				"multiple-1", MultiplePrototypesInSpringContextTestBean.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+				NativeLifecycleOptions.INSTANCE,
+				IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
 		assertNotNull(bean2);
@@ -164,7 +164,8 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 
 		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
 				NoDefinitionInSpringContextTestBean.class,
-				JpaLifecycleOptions.INSTANCE, fallbackProducer
+				JpaLifecycleOptions.INSTANCE,
+				fallbackProducer
 		);
 
 		assertEquals(1, fallbackProducer.currentUnnamedInstantiationCount());
@@ -185,7 +186,8 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 
 		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
 				"some name", NoDefinitionInSpringContextTestBean.class,
-				JpaLifecycleOptions.INSTANCE, fallbackProducer
+				JpaLifecycleOptions.INSTANCE,
+				fallbackProducer
 		);
 
 		assertEquals(0, fallbackProducer.currentUnnamedInstantiationCount());
@@ -207,7 +209,8 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 
 		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
 				NoDefinitionInSpringContextTestBean.class,
-				NativeLifecycleOptions.INSTANCE, fallbackProducer
+				NativeLifecycleOptions.INSTANCE,
+				fallbackProducer
 		);
 
 		assertEquals(1, fallbackProducer.currentUnnamedInstantiationCount());
@@ -228,7 +231,8 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 
 		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
 				"some name", NoDefinitionInSpringContextTestBean.class,
-				NativeLifecycleOptions.INSTANCE, fallbackProducer
+				NativeLifecycleOptions.INSTANCE,
+				fallbackProducer
 		);
 
 		assertEquals(0, fallbackProducer.currentUnnamedInstantiationCount());
@@ -242,40 +246,11 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 		assertNull(instance.getApplicationContext());
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testFallbackExceptionInCaseOfNoSpringBeanFound() {
-		getBeanContainer().getBean(NoDefinitionInSpringContextTestBean.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
-		);
-	}
-
-	@Test(expected = BeanCreationException.class)
-	public void testOriginalExceptionInCaseOfFallbackProducerFailure() {
-		getBeanContainer().getBean(AttributeConverter.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
-		);
-	}
-
-	@Test(expected = UnsupportedOperationException.class)
-	public void testFallbackExceptionInCaseOfNoSpringBeanFoundByName() {
-		getBeanContainer().getBean("some name", NoDefinitionInSpringContextTestBean.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
-		);
-	}
-
-	@Test(expected = BeanCreationException.class)
-	public void testOriginalExceptionInCaseOfFallbackProducerFailureByName() {
-		getBeanContainer().getBean("invalid", AttributeConverter.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
-		);
-	}
-
 
 	/**
 	 * The lifecycle options mandated by the JPA spec and used as a default in Hibernate ORM.
 	 */
 	private static class JpaLifecycleOptions implements BeanContainer.LifecycleOptions {
-
 		public static final JpaLifecycleOptions INSTANCE = new JpaLifecycleOptions();
 
 		@Override
@@ -289,14 +264,12 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 		}
 	}
 
-
 	/**
 	 * The lifecycle options used by libraries integrating into Hibernate ORM
 	 * and that want a behavior closer to Spring's native behavior,
 	 * such as Hibernate Search.
 	 */
 	private static class NativeLifecycleOptions implements BeanContainer.LifecycleOptions {
-
 		public static final NativeLifecycleOptions INSTANCE = new NativeLifecycleOptions();
 
 		@Override
@@ -310,9 +283,7 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 		}
 	}
 
-
 	private static class IneffectiveBeanInstanceProducer implements BeanInstanceProducer {
-
 		public static final IneffectiveBeanInstanceProducer INSTANCE = new IneffectiveBeanInstanceProducer();
 
 		@Override
@@ -326,11 +297,8 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 		}
 	}
 
-
 	private static class NoDefinitionInSpringContextTestBeanInstanceProducer implements BeanInstanceProducer {
-
 		private int unnamedInstantiationCount = 0;
-
 		private int namedInstantiationCount = 0;
 
 		@Override
@@ -373,5 +341,4 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 			return namedInstantiationCount;
 		}
 	}
-
 }

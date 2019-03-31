@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -72,9 +72,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.MergedAnnotation;
-import org.springframework.core.annotation.MergedAnnotations;
-import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -669,34 +667,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException {
 
-		return findMergedAnnotationOnBean(beanName, annotationType)
-				.synthesize(MergedAnnotation::isPresent).orElse(null);
-	}
-
-	private <A extends Annotation> MergedAnnotation<A> findMergedAnnotationOnBean(
-			String beanName, Class<A> annotationType) {
-
+		A ann = null;
 		Class<?> beanType = getType(beanName);
 		if (beanType != null) {
-			MergedAnnotation<A> annotation = MergedAnnotations.from(beanType,
-					SearchStrategy.EXHAUSTIVE).get(annotationType);
-			if (annotation.isPresent()) {
-				return annotation;
-			}
+			ann = AnnotationUtils.findAnnotation(beanType, annotationType);
 		}
-		if (containsBeanDefinition(beanName)) {
+		if (ann == null && containsBeanDefinition(beanName)) {
 			BeanDefinition bd = getMergedBeanDefinition(beanName);
 			if (bd instanceof AbstractBeanDefinition) {
 				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
 				if (abd.hasBeanClass()) {
-					Class<?> beanClass = abd.getBeanClass();
-					if (beanClass != beanType) {
-						return MergedAnnotations.from(beanClass, SearchStrategy.EXHAUSTIVE).get(annotationType);
-					}
+					ann = AnnotationUtils.findAnnotation(abd.getBeanClass(), annotationType);
 				}
 			}
 		}
-		return MergedAnnotation.missing();
+		return ann;
 	}
 
 
